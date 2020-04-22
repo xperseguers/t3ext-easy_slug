@@ -38,7 +38,6 @@ class DataHandler
         if (
             $table !== 'pages'
             || !MathUtility::canBeInterpretedAsInteger($id)
-            || !empty($incomingFieldArray['slug'])
             || (empty($incomingFieldArray['title']) && empty($incomingFieldArray['nav_title']))
         ) {
             return;
@@ -46,6 +45,11 @@ class DataHandler
 
         $record = BackendUtility::getRecordWSOL($table, $id);
         $record = array_merge($record, $incomingFieldArray);
+        if (!empty($record['nav_title'])) {
+            // The navigation title should logically be used if present in place
+            // of the title to generate the slug
+            $record['title'] = $record['nav_title'];
+        }
 
         $incomingFieldArray['slug'] = $this->buildSlug($record);
     }
