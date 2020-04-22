@@ -30,32 +30,68 @@ class DataHandler
      *
      * @param array $incomingFieldArray
      * @param string $table
-     * @param string|int $id (id could be string, for this reason no type hint)
+     * @param string|int $uid (uid could be string, for this reason no type hint)
      * @param \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler
      */
-    public function processDatamap_preProcessFieldArray(array &$incomingFieldArray, string $table, $id, \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler): void
+    public function processDatamap_preProcessFieldArray(array &$incomingFieldArray, string $table, $uid, \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler): void
     {
         if (
             $table !== 'pages'
-            || !MathUtility::canBeInterpretedAsInteger($id)
+            || !MathUtility::canBeInterpretedAsInteger($uid)
             || (empty($incomingFieldArray['title']) && empty($incomingFieldArray['nav_title']))
         ) {
             return;
         }
 
-        $record = BackendUtility::getRecordWSOL($table, $id);
-        $record = array_merge($record, $incomingFieldArray);
+        $incomingFieldArray['slug'] = $this->regenerateSlug($table, $uid, $incomingFieldArray);
+    }
+
+    /**
+     * Reacts to a page moved.
+     *
+     * @param string $command
+     * @param string $table
+     * @param int $uid
+     * @param int $value
+     * @param \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler
+     * @param bool|string $pasteUpdate
+     * @param array $pasteDatamap
+     */
+    public function processCmdmap_postProcess(string $command, string $table, int $uid, int $value, \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler, $pasteUpdate, array &$pasteDatamap): void
+    {
+        if ($table !== 'pages' || $command !== 'move') {
+            return;
+        }
+
+        // Create a new event to update the slug
+        $pasteDatamap[$table][$uid] = [
+            'slug' => $this->regenerateSlug($table, $uid),
+        ];
+    }
+
+    /**
+     * Regenerates the slug.
+     *
+     * @param string $table
+     * @param int $uid
+     * @param array $fields
+     * @return string
+     */
+    protected function regenerateSlug(string $table, int $uid, array $fields = []): string
+    {
+        $record = BackendUtility::getRecordWSOL($table, $uid);
+        $record = array_merge($record, $fields);
         if (!empty($record['nav_title'])) {
             // The navigation title should logically be used if present in place
             // of the title to generate the slug
             $record['title'] = $record['nav_title'];
         }
 
-        $incomingFieldArray['slug'] = $this->buildSlug($record);
+        return $this->buildSlug($record);
     }
 
     /**
-     * Build a unique Slug URI
+     * Builds a unique slug URI.
      *
      * @param array $record
      * @param int|null $pid
