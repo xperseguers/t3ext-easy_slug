@@ -15,11 +15,21 @@ In addition, I would logically expect the alternative navigation title to be use
 title if it is defined, but this does not happen natively. So this extension will use that field
 to generate the slug in place of the title, if present.
 
+
 ## Installation
+
+At the moment the extension is not available off the TYPO3 Extension Repository (TER). As such you
+are encouraged to install it via composer:
 
 ```
 composer req causal/easy_slug:dev-master
 ```
+
+And then? Well... just forget about it! It is meant to make working with slug finally easy and so
+it does.
+
+Do not hesitate to open a ticket if this is not the case.
+
 
 ## Known Limitations
 
