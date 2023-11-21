@@ -24,7 +24,6 @@ use TYPO3\CMS\Core\Utility\MathUtility;
 
 class DataHandler
 {
-
     /**
      * Collects slugs of persisted records before having been updated.
      *
@@ -33,7 +32,12 @@ class DataHandler
      * @param string|int $uid (uid could be string, for this reason no type hint)
      * @param \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler
      */
-    public function processDatamap_preProcessFieldArray(array &$incomingFieldArray, string $table, $uid, \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler): void
+    public function processDatamap_preProcessFieldArray(
+        array &$incomingFieldArray,
+        string $table,
+        $uid,
+        \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler
+    ): void
     {
         if (
             $table !== 'pages'
@@ -57,7 +61,15 @@ class DataHandler
      * @param bool|string $pasteUpdate
      * @param array $pasteDatamap
      */
-    public function processCmdmap_postProcess(string $command, string $table, int $uid, int $value, \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler, $pasteUpdate, array &$pasteDatamap): void
+    public function processCmdmap_postProcess(
+        string $command,
+        string $table,
+        int $uid,
+        int $value,
+        \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler,
+        $pasteUpdate,
+        array &$pasteDatamap
+    ): void
     {
         if ($table !== 'pages' || $command !== 'move') {
             return;
@@ -99,7 +111,12 @@ class DataHandler
      * @param string $slugFieldName
      * @return string
      */
-    public function buildSlug(array $record, ?int $pid = null, string $table = 'pages', string $slugFieldName = 'slug'): string
+    public function buildSlug(
+        array $record,
+        ?int $pid = null,
+        string $table = 'pages',
+        string $slugFieldName = 'slug'
+    ): string
     {
         $fieldConfig = $GLOBALS['TCA'][$table]['columns'][$slugFieldName]['config'];
 
@@ -110,7 +127,7 @@ class DataHandler
             $fieldConfig
         );
 
-        $pid = ($pid !== null) ? $pid : $record['pid'];
+        $pid = $pid ?? $record['pid'];
         $slug = $slugHelper->generate($record, $pid);
 
         $state = RecordStateFactory::forName($table)->fromArray($record, $pid);
@@ -127,5 +144,4 @@ class DataHandler
 
         return $slug;
     }
-
 }
